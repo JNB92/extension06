@@ -98,6 +98,7 @@ int main(void) {
             case STATE_F:
                 if (c == 'o') currentState = STATE_FO;
                 else if (c == 'f') currentState = STATE_F;
+                else if (c == 'b') currentState = STATE_B;
                 else currentState = STATE_INITIAL;
                 break;
 
@@ -150,14 +151,18 @@ int main(void) {
                     if (wasFooDetected) {
                         uart_putc('\n');
                         wasFooDetected = false;  // Reset the flag after processing "foobar"
-                    } else {
+                    } 
+                    else if (c == 'r' && !wasFooDetected) {
                         uart_putc('1');  // This is the fix for "bar" detection
                     }
                     currentState = STATE_INITIAL;
-                } else if (c == 'f') {
-                    currentState = STATE_F;
-                }
-                else currentState = STATE_INITIAL;
+                    } else if (c == 'f') {
+                        currentState = STATE_F;
+                    }
+                    else if (c == 'b') {
+                        currentState = STATE_B;
+                    }
+                    else currentState = STATE_INITIAL;
                 break;
         }
     }
