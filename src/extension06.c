@@ -131,10 +131,7 @@ int main(void) {
                     currentState = STATE_INITIAL;
                 } else {
                     uart_putc('0'); // for 'foo'
-                    if (c == 'a') {
-                        uart_putc('1'); // for 'ba'
-                        currentState = STATE_INITIAL;
-                    } else if (c == 'f') currentState = STATE_F;
+                    if (c == 'f') currentState = STATE_F;
                     else if (c == 'b') currentState = STATE_B; 
                     else currentState = STATE_INITIAL;
                 }
