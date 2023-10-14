@@ -105,35 +105,37 @@ int main(void) {
         break;
 
     case STATE_FOO:
-        if (c == 'b') currentState = STATE_FOOB;
-        else {
-            uart_putc('0');
-            if (c == 'f') currentState = STATE_F;
-            else currentState = STATE_INITIAL;
-        }
-        break;
+    if (c == 'b') currentState = STATE_FOOB;
+    else {
+        uart_putc('0');
+        currentState = (c == 'f') ? STATE_F : STATE_INITIAL;
+    }
+    break;
 
-    case STATE_FOOB:
-        if (c == 'a') currentState = STATE_FOOBA;
-        else {
-            uart_putc('0');
-            if (c == 'f') currentState = STATE_F;
-            else if (c == 'b') currentState = STATE_B;
-            else currentState = STATE_INITIAL;
-        }
-        break;
+case STATE_FOOB:
+    if (c == 'a') currentState = STATE_FOOBA;
+    else {
+        uart_putc('0'); // for 'foo'
+        if (c == 'f') currentState = STATE_F;
+        else if (c == 'b') currentState = STATE_B; 
+        else currentState = STATE_INITIAL;
+    }
+    break;
 
-    case STATE_FOOBA:
-        if (c == 'r') {
-            uart_putc('\n');
+case STATE_FOOBA:
+    if (c == 'r') {
+        uart_putc('\n');
+        currentState = STATE_INITIAL;
+    } else {
+        uart_putc('0'); // for 'foo'
+        if (c == 'a') {
+            uart_putc('1'); // for 'ba'
             currentState = STATE_INITIAL;
-        } else {
-            uart_putc('0');
-            if (c == 'f') currentState = STATE_F;
-            else if (c == 'b') currentState = STATE_B;
-            else currentState = STATE_INITIAL;
-        }
-        break;
+        } else if (c == 'f') currentState = STATE_F;
+        else if (c == 'b') currentState = STATE_B; 
+        else currentState = STATE_INITIAL;
+    }
+    break;
 
     case STATE_B:
         if (c == 'a') currentState = STATE_BA;
