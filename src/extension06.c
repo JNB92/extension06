@@ -104,6 +104,7 @@ int main(void) {
             case STATE_FO:
                 if (c == 'o') currentState = STATE_FOO;
                 else if (c == 'f') currentState = STATE_F;
+                else if (c == 'b') currentState = STATE_B;
                 else currentState = STATE_INITIAL;
                 break;
 
