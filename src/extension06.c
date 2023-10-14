@@ -52,11 +52,15 @@ typedef enum {
     STATE_INITIAL,
     STATE_F,
     STATE_FO,
+    STATE_FOO,
+    STATE_FOOB,
+    STATE_FOOBA,
     STATE_B,
     STATE_BA
 } State;
 
 State currentState = STATE_INITIAL;
+
 
 void UART_init() {
     PORTB.DIRSET = PIN2_bm;
@@ -73,86 +77,84 @@ void uart_putc(char c) {
     while (!(USART0.STATUS & USART_DREIF_bm)); // Wait for TXDATA empty
     USART0.TXDATAL = c;
 }
+
 int main(void) {
     cli();
     UART_init();
     sei();
 
-    bool wasFooDetected = false;
-
     while (1) {
         char c = uart_getc();
 
-        if (wasFooDetected && (c != 'b' && c != 'f')) {
-            uart_putc('0');
-            wasFooDetected = false;
-        }
-
         switch (currentState) {
-            case STATE_INITIAL:
-                if (c == 'f') currentState = STATE_F;
-                else if (c == 'b') currentState = STATE_B;
-                break;
+    case STATE_INITIAL:
+        if (c == 'f') currentState = STATE_F;
+        else if (c == 'b') currentState = STATE_B;
+        break;
 
-            case STATE_F:
-                if (c == 'o') currentState = STATE_FO;
-                else if (c == 'f') currentState = STATE_F;
-                else currentState = STATE_INITIAL;
-                break;
+    case STATE_F:
+        if (c == 'o') currentState = STATE_FO;
+        else if (c == 'f') currentState = STATE_F;
+        else currentState = STATE_INITIAL;
+        break;
 
-            case STATE_FO:
-                if (c == 'o') {
-                    wasFooDetected = true;
-                    currentState = STATE_INITIAL;
-                } else if (c == 'f') currentState = STATE_F;
-                else if (c == 'b') currentState = STATE_B;
-                else currentState = STATE_INITIAL;
-                break;
+    case STATE_FO:
+        if (c == 'o') currentState = STATE_FOO;
+        else if (c == 'f') currentState = STATE_F;
+        else currentState = STATE_INITIAL;
+        break;
 
-            case STATE_B:
-                if (c == 'a') currentState = STATE_BA;
-                else if (c == 'f') {
-                    if (wasFooDetected) {
-                        uart_putc('0');
-                        wasFooDetected = false;
-                    }
-                    currentState = STATE_F;
-                } else {
-                    if (wasFooDetected) {
-                        uart_putc('0');
-                        wasFooDetected = false;
-                    }
-                    currentState = STATE_INITIAL;
-                }
-                break;
-
-            case STATE_BA:
-                if (c == 'r') {
-                    if (wasFooDetected) {
-                        uart_putc('\n');
-                        wasFooDetected = false;
-                    } else {
-                        uart_putc('1');
-                    }
-                    currentState = STATE_INITIAL;
-                } else if (c == 'f') {
-                    if (wasFooDetected) {
-                        uart_putc('0');
-                        wasFooDetected = false;
-                    }
-                    currentState = STATE_F;
-                } else {
-                    if (wasFooDetected) {
-                        uart_putc('0');
-                        wasFooDetected = false;
-                    }
-                    currentState = STATE_INITIAL;
-                }
-                break;
+    case STATE_FOO:
+        if (c == 'b') currentState = STATE_FOOB;
+        else {
+            uart_putc('0');
+            if (c == 'f') currentState = STATE_F;
+            else currentState = STATE_INITIAL;
         }
-    }
+        break;
 
-    return 0;
+    case STATE_FOOB:
+        if (c == 'a') currentState = STATE_FOOBA;
+        else {
+            uart_putc('0');
+            if (c == 'f') currentState = STATE_F;
+            else if (c == 'b') currentState = STATE_B;
+            else currentState = STATE_INITIAL;
+        }
+        break;
+
+    case STATE_FOOBA:
+        if (c == 'r') {
+            uart_putc('\n');
+            currentState = STATE_INITIAL;
+        } else {
+            uart_putc('0');
+            if (c == 'f') currentState = STATE_F;
+            else if (c == 'b') currentState = STATE_B;
+            else currentState = STATE_INITIAL;
+        }
+        break;
+
+    case STATE_B:
+        if (c == 'a') currentState = STATE_BA;
+        else if (c == 'f') currentState = STATE_F;
+        else currentState = STATE_INITIAL;
+        break;
+
+    case STATE_BA:
+        if (c == 'r') {
+            uart_putc('1');
+            currentState = STATE_INITIAL;
+        } else if (c == 'f') currentState = STATE_F;
+        else currentState = STATE_INITIAL;
+        break;
+
+    default:
+        currentState = STATE_INITIAL;
+        break;
+}
+
+}
 }
 
 /** CODE: Write your code for Ex E6.0 above this line. */
